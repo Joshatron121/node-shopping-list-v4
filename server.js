@@ -71,8 +71,8 @@ app.put('/shopping-list/:id', jsonParser, (req, res) => {
   }
   console.log(`Updating shopping list item \`${req.params.id}\``);
   const updatedItem = ShoppingList.update({
-    id: req.params.id,
     name: req.body.name,
+    id: req.params.id,
     budget: req.body.budget
   });
   res.status(204).json(updatedItem);
@@ -111,6 +111,30 @@ app.delete('/recipes/:id', (req, res) => {
   console.log(`Deleted recipe \`${req.params.ID}\``);
   res.status(204).end();
 });
+
+app.put('/recipes/:id', jsonParser, (req, res) => {
+  const requiredFields = ['name', 'ingredients', 'id'];
+  for (let i=0; i<requiredFields.length; i++) {
+    const field = requiredFields[i]
+    if (!(field in req.body)) {
+      const message = `Missing ${field} in request body`
+      console.error(message);
+      return res.status(400).send(message);
+    }
+    if (req.params.id !== req.body.id) {
+      const message = `Id in paramaters: ${req.params.id} must match Id in body: ${req.body.id}`
+      console.error(message)
+      return res.status(400).send(message);
+    }
+  }
+  console.log(`Updating recipe item: ${req.body.id}`)
+  const updatedItem = Recipes.update({
+    name: req.body.name, 
+    id: req.body.id,
+    ingredients: req.body.ingredients
+  });
+  res.status(204).json(updatedItem);
+})
 
 app.listen(process.env.PORT || 8080, () => {
   console.log(`Your app is listening on port ${process.env.PORT || 8080}`);
